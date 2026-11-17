@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AWS Community Global · 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:#232f3e; --ink2:#0b1119;
+  --orange:#ff9900; --orange2:#ff9900;
+  --sbg:#ff9900; --ug:#539fe5;
+  --bg:#0f1b2a; --card:#192534; --card2:#212f41;
+  --text:#e9ebed; --muted:#9ba7b6; --line:#354150;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Amazon Ember","Helvetica Neue",Roboto,Arial,sans-serif;
+  background:radial-gradient(1200px 600px at 80% -10%,#1d2b3f 0%,var(--bg) 55%);
+  background-attachment:fixed;color:var(--text);line-height:1.5;min-height:100vh;}
+.wrap{max-width:1200px;margin:0 auto;padding:32px 20px 80px;}
+
+/* Barra superior estilo AWS */
+.topnav{background:var(--ink2);border-bottom:2px solid var(--orange2);}
+.topnav .in{max-width:1200px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:14px;}
+.logo{display:flex;flex-direction:column;align-items:flex-start;line-height:1;}
+.logo b{color:#fff;font-size:26px;font-weight:800;letter-spacing:-1px;}
+.logo svg{margin-top:-3px;margin-left:2px;}
+.topnav .sep{width:1px;height:26px;background:#414d5c;}
+.topnav .nav-title{color:#d5dbdb;font-size:14px;font-weight:600;}
+.topnav .nav-year{margin-left:auto;color:#16191f;background:var(--orange2);font-weight:700;
+  font-size:12px;padding:4px 12px;border-radius:999px;}
+header.hero{background:linear-gradient(135deg,#17222f 0%,#232f3e 100%);border-bottom:1px solid var(--line);color:#fff;
+  text-align:center;padding:44px 20px 40px;}
+.badge{display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,153,0,.15);color:var(--orange2);
+  border:1px solid rgba(255,153,0,.5);
+  padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;}
+h1{font-size:clamp(28px,4.4vw,46px);margin:16px 0 8px;font-weight:800;letter-spacing:-.5px;color:#fff;}
+h1 .accent{color:var(--orange2);}
+.subtitle{color:#d5dbdb;font-size:15px;max-width:720px;margin:0 auto;}
+.subtitle strong{color:#fff;}
+
+/* Controles */
+.controls{display:flex;flex-direction:column;align-items:center;gap:10px;margin:28px 0 8px;}
+.ctrl-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.ctrl-label{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);
+  align-self:center;white-space:nowrap;}
+button.pill{background:var(--card2);color:var(--text);border:1px solid var(--line);
+  padding:8px 16px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;}
+button.pill .sub{display:block;font-size:10px;font-weight:500;color:var(--muted);}
+button.pill.active{background:var(--orange2);color:#16191f;border-color:var(--orange2);}
+button.pill:hover:not(.active){border-color:var(--orange2);}
+button.pill.active .sub{color:rgba(22,25,31,.75);}
+
+/* País selector */
+.pais-bar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:1100px;}
+button.pais{background:var(--card2);color:var(--muted);border:1px solid var(--line);
+  padding:6px 13px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;}
+button.pais.active{background:rgba(255,153,0,.18);color:var(--orange);border-color:rgba(255,153,0,.5);}
+button.pais.active.has-data{background:var(--orange);color:#1a1300;border-color:var(--orange);}
+
+select.pais-select{background:var(--card2);color:var(--text);border:1px solid var(--line);
+  padding:9px 14px;border-radius:999px;font-size:13px;font-weight:600;min-width:260px;cursor:pointer;
+  max-width:92vw;}
+select.pais-select:focus{outline:none;border-color:var(--orange);}
+.cont-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin:24px 0 12px;}
+.kpi{background:linear-gradient(160deg,var(--card) 0%,var(--card2) 100%);
+  border:1px solid var(--line);border-top:3px solid var(--orange2);border-radius:8px;padding:20px 22px;position:relative;overflow:hidden;
+  box-shadow:0 1px 1px rgba(0,0,0,.35);}
+
+.kpi .num{font-size:34px;font-weight:800;color:var(--orange2);line-height:1;}
+.kpi .lbl{color:var(--muted);font-size:12px;margin-top:8px;text-transform:uppercase;letter-spacing:.6px;}
+
+section{margin-top:38px;}
+.section-title{font-size:20px;font-weight:700;margin-bottom:3px;color:#fff;padding-left:10px;border-left:4px solid var(--orange2);}
+.section-sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:22px;box-shadow:0 1px 1px rgba(0,0,0,.35);}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:820px){.charts{grid-template-columns:1fr;}}
+.chart-box{position:relative;height:460px;}
+
+/* Tabla ranking */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;
+  text-transform:uppercase;letter-spacing:.5px;padding:9px 11px;border-bottom:1px solid var(--line);}
+thead th.num,tbody td.num{text-align:right;}
+tbody td{padding:10px 11px;border-bottom:1px solid rgba(53,65,80,.6);vertical-align:middle;}
+tbody tr:hover{background:rgba(255,255,255,.03);}
+.rank{display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:7px;font-weight:700;font-size:12px;
+  background:var(--card2);color:var(--muted);}
+tr.top-1 .rank{background:var(--orange2);color:#16191f;}
+tr.top-2 .rank{background:#c9d3e3;color:#16191f;}
+tr.top-3 .rank{background:#cd8b52;color:#1a0f04;}
+.gname{font-weight:600;}
+.bar-cell{min-width:100px;}
+.bar{height:7px;border-radius:6px;background:linear-gradient(90deg,var(--orange2),#ffb84d);}
+.muted{color:var(--muted);}
+.pill-tag{font-size:10px;padding:2px 7px;border-radius:999px;background:rgba(154,167,189,.15);color:var(--muted);}
+.badge-type{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;}
+.badge-type.SBG{background:rgba(255,153,0,.16);color:#ffb84d;}
+.badge-type.UG{background:rgba(83,159,229,.18);color:#7cb8f0;}
+.badge-pais{font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;
+  background:rgba(255,153,0,.12);color:#ffb84d;}
+
+/* Detalle acordeón */
+details.group{background:var(--card);border:1px solid var(--line);border-radius:8px;
+  margin-bottom:10px;overflow:hidden;}
+details.group summary{cursor:pointer;padding:14px 16px;display:flex;align-items:center;
+  gap:8px;list-style:none;font-weight:600;font-size:13px;}
+details.group summary::-webkit-details-marker{display:none;}
+details.group summary .chev{margin-left:auto;color:var(--muted);transition:transform .2s;}
+details.group[open] summary .chev{transform:rotate(90deg);}
+.ev-table{width:100%;font-size:12px;}
+.ev-table td,.ev-table th{padding:7px 16px;}
+.ev-table thead th{border-top:1px solid var(--line);}
+.tag{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:600;}
+.tag.ONLINE{background:rgba(83,159,229,.18);color:#7cb8f0;}
+.tag.PHYSICAL{background:rgba(74,222,128,.15);color:#86efac;}
+.tag.HYBRID{background:rgba(255,153,0,.18);color:#ffb84d;}
+a.ev-link{color:#ffb84d;text-decoration:none;}
+a.ev-link:hover{text-decoration:underline;}
+
+.sort-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+
+/* Top países mini-cards */
+.pais-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:24px;}
+.pais-card{background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;cursor:pointer;transition:border-color .15s;}
+.pais-card:hover,.pais-card.sel{border-color:var(--orange);}
+.pais-card .flag{font-size:22px;margin-bottom:6px;}
+.pais-card .pname{font-weight:700;font-size:14px;}
+.pais-card .pstats{color:var(--muted);font-size:12px;margin-top:4px;}
+.pais-card .pbar{height:5px;border-radius:4px;background:var(--orange2);margin-top:8px;opacity:.7;}
+
+footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:12px;text-align:center;}
+footer .note{max-width:760px;margin:0 auto 10px;}
+code{background:var(--card2);padding:1px 5px;border-radius:4px;font-size:11px;}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="in">
+  <div class="logo"><b>aws</b>
+    <svg width="34" height="10" viewBox="0 0 34 10" fill="none"><path d="M2 2 Q17 11 31 2" stroke="#ff9900" stroke-width="2.5" stroke-linecap="round"/><path d="M26 1.5 L31.5 2 L29 6.5" stroke="#ff9900" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <span class="sep"></span><span class="nav-title">Community</span>
+  <span class="nav-year">2026</span>
+</div></nav>
+<header class="hero">
+  <span class="badge">🌍 AWS Community · Global</span>
+  <h1><span class="accent">AWS Community</span> Global</h1>
+  <p class="subtitle">Student Builder Groups y User Groups de todo el mundo — eventos realizados en <strong>2026</strong>.</p>
+</header>
+<div class="wrap">
+
+
+<!-- Controles -->
+<div class="controls">
+  <div class="ctrl-row">
+    <span class="ctrl-label">Tipo</span>
+    <div id="typeBar">
+      <button class="pill active" data-type="ALL">Todos <span class="sub">SBG + UG</span></button>
+      <button class="pill" data-type="SBG">Solo SBG <span class="sub">Student Builder</span></button>
+      <button class="pill" data-type="UG">Solo UG <span class="sub">User Groups</span></button>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Continente</span>
+    <div class="cont-bar" id="contBar"></div>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">País</span>
+    <select class="pais-select" id="paisSelect"></select>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpis">
+  <div class="kpi"><div class="num" id="kpi-grupos">—</div><div class="lbl">Grupos</div></div>
+  <div class="kpi"><div class="num" id="kpi-activos">—</div><div class="lbl">Con actividad</div></div>
+  <div class="kpi"><div class="num" id="kpi-paises">—</div><div class="lbl">Países</div></div>
+  <div class="kpi"><div class="num" id="kpi-meetups">—</div><div class="lbl">Meetups 2026</div></div>
+  <div class="kpi"><div class="num" id="kpi-alcance">—</div><div class="lbl">Alcance total</div></div>
+  <div class="kpi"><div class="num" id="kpi-miembros">—</div><div class="lbl">Miembros nuevos 2026</div></div>
+</div>
+
+<!-- Mapa de países (cards) -->
+<section id="paisSection">
+  <div class="section-title">Vista por país</div>
+  <div class="section-sub">Haz clic en un país para cargar sus estadísticas (también puedes elegirlo en el selector). Barra = alcance relativo al máximo.</div>
+  <div class="pais-grid" id="paisGrid"></div>
+</section>
+
+<!-- Gráficas -->
+<section>
+  <div class="section-title">Top grupos</div>
+  <div class="section-sub">Los 20 primeros del filtro activo por meetups y alcance.</div>
+  <div class="charts">
+    <div class="card"><div class="chart-box"><canvas id="chartMeetups"></canvas></div></div>
+    <div class="card"><div class="chart-box"><canvas id="chartReach"></canvas></div></div>
+  </div>
+</section>
+
+<!-- Ranking -->
+<section>
+  <div class="section-title">Ranking 2026</div>
+  <div class="section-sub">Ordena por el criterio que prefieras.</div>
+  <div class="sort-row" id="sortRow">
+    <button class="pill active" data-sort="meetups">Por meetups</button>
+    <button class="pill" data-sort="alcance">Por alcance</button>
+    <button class="pill" data-sort="miembros">Por miembros nuevos</button>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th style="width:36px">#</th>
+        <th>Grupo</th>
+        <th class="num">Meetups</th>
+        <th class="num">Alcance</th>
+        <th class="num">Miembros nuevos 2026</th>
+        <th class="bar-cell">Relativo</th>
+      </tr></thead>
+      <tbody id="rankingBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Detalle -->
+<section>
+  <div class="section-title">Detalle evento por evento</div>
+  <div class="section-sub">Solo grupos con actividad en 2026. Haz clic para expandir.</div>
+  <div id="detail"></div>
+</section>
+
+<footer>
+  <p class="note">
+    Datos obtenidos de la API pública de Meetup, grupos con "AWS" en el nombre, descubiertos con búsquedas por ciudad (cobertura de mejor esfuerzo: puede faltar algún grupo).
+    <strong>Miembros nuevos</strong> = membresías con fecha de ingreso en 2026 entre los miembros actuales. <strong>Alcance</strong> = suma de RSVP confirmados (<code>yesCount</code>), no asistencia física verificada.
+    Solo se cuentan eventos con estado <em>PAST</em> del año 2026.
+  </p>
+  <p id="genDate" class="muted"></p>
+</footer>
+
+</div>
+<script>
+const DATA   = /*__DATA__*/null;
+const EVENTS = /*__EVENTS__*/null;
+
+const FLAGS = new Proxy({}, {
+  get: (_, code) => (typeof code === "string" && /^[a-z]{2}$/i.test(code))
+    ? String.fromCodePoint(...[...code.toUpperCase()].map(c => 127397 + c.charCodeAt(0)))
+    : undefined
+});
+const COLOR_SBG = "rgba(255,153,0,.85)";
+const COLOR_UG  = "rgba(83,159,229,.8)";
+const COLOR_MIX = "rgba(255,153,0,.72)";
+const BORDER_SBG= "#ff9900"; const BORDER_UG="#539fe5"; const BORDER_MIX="#ff9900";
+
+const CONT_NAMES = {
+  NA:"América del Norte", LATAM:"Latinoamérica", EU:"Europa", AS:"Asia", AF:"África", OC:"Oceanía"
+};
+const CONT = {};
+const _c = (k, codes) => codes.split(" ").forEach(c => CONT[c] = k);
+_c("NA","us ca");
+_c("LATAM","mx gt hn sv ni cr pa cu do pr jm tt bs bb ht co ve ec pe bo cl ar uy py br");
+_c("EU","gb ie fr de es pt it nl be lu ch at se no dk fi is pl cz sk hu ro bg gr hr si rs ba mk al me ua by md lt lv ee ru cy mt ad xk");
+_c("AS","tr ge am az il ps jo lb sa ae qa kw bh om iq ir sy kz uz kg in pk bd lk np bt mv cn hk tw jp kr mn sg my th vn id ph kh la mm");
+_c("OC","au nz fj pg");
+_c("AF","eg ma dz tn ly ng gh ke tz ug rw et za zw zm na bw mz ao cm ci sn ml bf mu mg sd cd ne bj tg ga cg mw sl lr ss so dj bi");
+const contOf = code => CONT[code] || "AS";
+
+let selCont = "ALL";
+let selPais = "ALL";
+let selType = "ALL";
+let sortBy  = "meetups";
+let chartM = null, chartR = null;
+
+// ── helpers ──────────────────────────────────────────────────────────────
+function filtered() {
+  return DATA.grupos.filter(g =>
+    (selCont === "ALL" || contOf(g.pais) === selCont) &&
+    (selPais === "ALL" || g.pais === selPais) &&
+    (selType === "ALL" || g.tipo  === selType)
+  );
+}
+
+function sortVal(g) {
+  if (sortBy === "alcance")  return g.alcance_2026;
+  if (sortBy === "miembros") return g.miembros;
+  return g.meetups_2026;
+}
+
+function barColor(g) {
+  if (selType !== "ALL") return selType === "SBG" ? COLOR_SBG : COLOR_UG;
+  return g.tipo === "SBG" ? COLOR_SBG : COLOR_UG;
+}
+function borderColor(g) {
+  if (selType !== "ALL") return selType === "SBG" ? BORDER_SBG : BORDER_UG;
+  return g.tipo === "SBG" ? BORDER_SBG : BORDER_UG;
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────
+function renderKpis() {
+  const gs = filtered();
+  const activos  = gs.filter(g => g.meetups_2026 > 0);
+  const meetups  = gs.reduce((s,g) => s + g.meetups_2026, 0);
+  const alcance  = gs.reduce((s,g) => s + g.alcance_2026, 0);
+  const miembros = gs.reduce((s,g) => s + g.miembros, 0);
+  const paises   = new Set(activos.map(g => g.pais)).size;
+  document.getElementById("kpi-grupos").textContent   = gs.length;
+  document.getElementById("kpi-activos").textContent  = activos.length;
+  document.getElementById("kpi-paises").textContent   = paises;
+  document.getElementById("kpi-meetups").textContent  = meetups;
+  document.getElementById("kpi-alcance").textContent  = alcance.toLocaleString("es");
+  document.getElementById("kpi-miembros").textContent = miembros.toLocaleString("es");
+}
+
+// ── Continente + País ─────────────────────────────────────────────────────
+function contStats(k) {
+  const gs = DATA.grupos.filter(g =>
+    (k === "ALL" || contOf(g.pais) === k) && (selType === "ALL" || g.tipo === selType));
+  return { grupos: gs.length };
+}
+
+function renderContBar() {
+  const bar = document.getElementById("contBar");
+  bar.innerHTML = "";
+  [["ALL","🌍 Todo el mundo"], ...Object.entries(CONT_NAMES)].forEach(([k, name]) => {
+    const st = contStats(k);
+    if (k !== "ALL" && st.grupos === 0) return;
+    const btn = document.createElement("button");
+    btn.className = "pill" + (selCont === k ? " active" : "");
+    btn.innerHTML = `${name} <span class="sub">${st.grupos.toLocaleString("es")} grupos</span>`;
+    btn.addEventListener("click", () => { selCont = k; selPais = "ALL"; renderAll(); });
+    bar.appendChild(btn);
+  });
+}
+
+function renderPaisBar() {
+  const sel = document.getElementById("paisSelect");
+  const cnt = {};
+  DATA.grupos.forEach(g => {
+    if (selType !== "ALL" && g.tipo !== selType) return;
+    if (selCont !== "ALL" && contOf(g.pais) !== selCont) return;
+    cnt[g.pais] = (cnt[g.pais] || 0) + 1;
+  });
+  const opts = Object.entries(DATA.paises)
+    .filter(([code]) => cnt[code])
+    .map(([code, name]) => ({ code, name, n: cnt[code] }))
+    .sort((a,b) => a.name.localeCompare(b.name, "es"));
+  const total = opts.reduce((s,o)=>s+o.n,0);
+  if (selPais !== "ALL" && !cnt[selPais]) selPais = "ALL";
+  sel.innerHTML = `<option value="ALL">Todos los países (${opts.length}) · ${total.toLocaleString("es")} grupos</option>` +
+    opts.map(o => `<option value="${o.code}">${FLAGS[o.code]||"🌎"} ${o.name} · ${o.n.toLocaleString("es")} grupos</option>`).join("");
+  sel.value = selPais;
+}
+
+document.getElementById("paisSelect").addEventListener("change", e => {
+  selPais = e.target.value; renderAll();
+});
+
+// ── País grid cards ───────────────────────────────────────────────────────
+function renderPaisGrid() {
+  const grid = document.getElementById("paisGrid");
+  grid.innerHTML = "";
+  // Con un país elegido, los demás países no se muestran
+  document.getElementById("paisSection").style.display = selPais === "ALL" ? "" : "none";
+  if (selPais !== "ALL") return;
+  const entries = Object.entries(DATA.paises)
+    .map(([code, name]) => ({ code, name, t: DATA.totales[code] || {meetups:0,alcance:0,grupos:0,activos:0} }))
+    .filter(x => selCont === "ALL" || contOf(x.code) === selCont)
+    .filter(x => {
+      // Filtra por tipo si hay selección
+      if (selType === "ALL") return x.t.meetups > 0;
+      // Recalcula para el tipo
+      const gs = DATA.grupos.filter(g => g.pais === x.code && g.tipo === selType);
+      x._m = gs.reduce((s,g)=>s+g.meetups_2026,0);
+      x._a = gs.reduce((s,g)=>s+g.alcance_2026,0);
+      return x._m > 0;
+    })
+    .sort((a,b) => {
+      const am = selType==="ALL" ? a.t.meetups : (a._m||0);
+      const bm = selType==="ALL" ? b.t.meetups : (b._m||0);
+      return bm - am;
+    });
+
+  const maxA = Math.max(1, ...entries.map(x => selType==="ALL" ? x.t.alcance : (x._a||0)));
+
+  entries.forEach(({ code, name, t, _m, _a }) => {
+    const meetups = selType==="ALL" ? t.meetups : (_m||0);
+    const alcance = selType==="ALL" ? t.alcance : (_a||0);
+    const card = document.createElement("div");
+    card.className = "pais-card" + (selPais === code ? " sel" : "");
+    card.innerHTML = `
+      <div class="flag">${FLAGS[code]||"🌎"}</div>
+      <div class="pname">${name}</div>
+      <div class="pstats">${meetups} meetups · ${alcance.toLocaleString("es")} alcance</div>
+      <div class="pbar" style="width:${Math.max(alcance/maxA*100,3)}%"></div>`;
+    card.addEventListener("click", () => { selPais = code; renderAll(); });
+    grid.appendChild(card);
+  });
+}
+
+// ── Charts ────────────────────────────────────────────────────────────────
+const gridColor  = "rgba(255,255,255,.07)";
+const tickColor  = "#9ba7b6";
+
+function commonOpts(title) {
+  return {
+    indexAxis:"y", responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      title:{display:true,text:title,color:"#e9ebed",font:{size:14,weight:"600"}},
+      tooltip:{backgroundColor:"#0b1119",borderColor:"#ff9900",borderWidth:1}
+    },
+    scales:{
+      x:{grid:{color:gridColor},ticks:{color:tickColor}},
+      y:{grid:{display:false},ticks:{color:"#e9ebed",font:{size:10}}}
+    }
+  };
+}
+
+function renderCharts() {
+  const gs = filtered().filter(g => g.meetups_2026 > 0);
+  const byM = [...gs].sort((a,b)=>b.meetups_2026-a.meetups_2026).slice(0,20);
+  const byA = [...gs].sort((a,b)=>b.alcance_2026-a.alcance_2026).slice(0,20);
+  if (chartM) chartM.destroy();
+  if (chartR) chartR.destroy();
+  chartM = new Chart(document.getElementById("chartMeetups"), {
+    type:"bar",
+    data:{ labels:byM.map(g=>g.nombre), datasets:[{
+      data:byM.map(g=>g.meetups_2026),
+      backgroundColor:byM.map(g=>barColor(g)),
+      borderColor:byM.map(g=>borderColor(g)),
+      borderWidth:1, borderRadius:5
+    }]},
+    options: commonOpts("Top 20 — Meetups realizados 2026")
+  });
+  chartR = new Chart(document.getElementById("chartReach"), {
+    type:"bar",
+    data:{ labels:byA.map(g=>g.nombre), datasets:[{
+      data:byA.map(g=>g.alcance_2026),
+      backgroundColor:byA.map(g=>barColor(g)),
+      borderColor:byA.map(g=>borderColor(g)),
+      borderWidth:1, borderRadius:5
+    }]},
+    options: commonOpts("Top 20 — Alcance (asistentes confirmados) 2026")
+  });
+}
+
+// ── Ranking ───────────────────────────────────────────────────────────────
+function renderRanking() {
+  const tbody = document.getElementById("rankingBody");
+  const gs = filtered();
+  const maxA = Math.max(1, ...gs.map(g=>g.alcance_2026));
+  const sorted = [...gs].sort((a,b) => sortVal(b)-sortVal(a) || b.alcance_2026-a.alcance_2026);
+  tbody.innerHTML = sorted.map((g,i) => {
+    const rc = i<3 && sortVal(g)>0 ? `top-${i+1}` : "";
+    const pct = g.alcance_2026/maxA*100;
+    const inact = g.meetups_2026===0 ? '<span class="pill-tag">sin actividad</span>' : "";
+    const paisShow = selPais==="ALL"
+      ? `<span class="badge-pais">${FLAGS[g.pais]||""} ${DATA.paises[g.pais]||g.pais.toUpperCase()}</span> ` : "";
+    return `<tr class="${rc}">
+      <td><span class="rank">${i+1}</span></td>
+      <td><span class="badge-type ${g.tipo}">${g.tipo}</span> ${paisShow}<span class="gname">${g.nombre}</span> ${inact}</td>
+      <td class="num">${g.meetups_2026}</td>
+      <td class="num">${g.alcance_2026}</td>
+      <td class="num">${g.miembros.toLocaleString("es")}</td>
+      <td class="bar-cell"><div class="bar" style="width:${Math.max(pct,2)}%"></div></td>
+    </tr>`;
+  }).join("");
+}
+
+// ── Detalle ───────────────────────────────────────────────────────────────
+function renderDetail() {
+  const div = document.getElementById("detail");
+  const gs = filtered().filter(g=>g.meetups_2026>0).sort((a,b)=>b.alcance_2026-a.alcance_2026);
+  div.innerHTML = gs.map(g => {
+    const evs = EVENTS.filter(e=>e.grupo===g.nombre && e.pais===g.pais)
+                      .sort((a,b)=>a.fecha.localeCompare(b.fecha));
+    const rows = evs.map(e=>`<tr>
+      <td class="muted" style="white-space:nowrap">${e.fecha}</td>
+      <td><span class="tag ${e.tipo}">${e.tipo||"—"}</span></td>
+      <td>${e.titulo}</td>
+      <td class="num">${e.asistentes}</td>
+      <td><a class="ev-link" href="${e.url}" target="_blank" rel="noopener">ver ↗</a></td>
+    </tr>`).join("");
+    const paisInfo = selPais==="ALL"
+      ? `<span class="badge-pais" style="font-size:11px">${FLAGS[g.pais]||""} ${DATA.paises[g.pais]||""}</span> ` : "";
+    return `<details class="group">
+      <summary>
+        <span class="badge-type ${g.tipo}">${g.tipo}</span>
+        ${paisInfo}<span>${g.nombre}</span>
+        <span class="muted" style="font-weight:400">· ${g.meetups_2026} meetups · ${g.alcance_2026} alcance · ${g.miembros.toLocaleString("es")} miembros nuevos</span>
+        <span class="chev">▶</span>
+      </summary>
+      <table class="ev-table">
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Evento</th><th class="num">Asist.</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </details>`;
+  }).join("");
+}
+
+// ── renderAll ─────────────────────────────────────────────────────────────
+function renderAll() {
+  renderKpis();
+  renderContBar();
+  renderPaisBar();
+  renderPaisGrid();
+  renderCharts();
+  renderRanking();
+  renderDetail();
+}
+
+// ── Eventos UI ────────────────────────────────────────────────────────────
+document.getElementById("typeBar").querySelectorAll("button").forEach(btn =>
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#typeBar button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active"); selType = btn.dataset.type; renderAll();
+  })
+);
+document.getElementById("sortRow").querySelectorAll("button").forEach(btn =>
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#sortRow button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active"); sortBy = btn.dataset.sort; renderRanking();
+  })
+);
+
+document.getElementById("genDate").textContent =
+  "Generado a partir de datos de Meetup · " + DATA.generado.slice(0,10) +
+  " · " + DATA.grupos.length + " grupos en " + Object.keys(DATA.paises).length + " países";
+
+renderAll();
+</script>
+</body>
+</html>
