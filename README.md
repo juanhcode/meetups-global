@@ -12,7 +12,7 @@ Sitio: https://awscommunity.live/
 
 - `scrape_global.py` descubre grupos con "AWS" en el nombre usando la API GraphQL pública de Meetup (sin login),
   descarga sus eventos pasados de 2026, el total de miembros y los miembros con fecha de ingreso en 2026.
-- Genera `output/global_grupos_2026.json`, `output/global_eventos_2026.csv` y `index.html` (a partir de `template.html`).
+- Genera `output/global_grupos_2026.json`, `output/global_eventos_2026.csv` y `index.html` (versión anterior, a partir de `template.html`).
 - La cobertura es de mejor esfuerzo: la búsqueda de Meetup devuelve máximo 200 resultados por consulta,
   así que se consulta desde ~260 ciudades con varias frases. Puede faltar algún grupo.
 
@@ -25,11 +25,24 @@ python3 -m http.server 8000   # ver en http://localhost:8000
 
 Opcionalmente, si existe `../meetups-latam/output/latam_grupos_2026.json`, se unen esos grupos a los descubiertos.
 
+## Web
+
+La interfaz está en `web/` (Vite + React): globo 3D, filtros, estadísticas y explorador de grupos. Ver `web/README.md`.
+
+```bash
+python3 web/scripts/prepare_data.py   # datos de output/ → web/public/data/
+cd web && npm install && npm run dev  # http://localhost:5173
+```
+
 ## Despliegue (S3 + CloudFront)
+
+Automático con GitHub Actions al hacer merge a `main` y cada día con datos nuevos. Configuración única: `docs/DESPLIEGUE.md`.
+
+Manual:
 
 ```bash
 cp .deploy.env.example .deploy.env   # completar con tu perfil, bucket y distribución
-./deploy.sh
+./deploy.sh                          # compila web/ y publica web/dist
 ```
 
 ## Notas sobre los datos

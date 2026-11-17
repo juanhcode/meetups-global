@@ -1,0 +1,78 @@
+name: Desplegar sitio
+
+# Se publica solo:
+#  - al hacer merge (push) a main
+#  - cada día, con datos nuevos de Meetup
+#  - a mano desde la pestaña Actions
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 11 * * *" # 06:00 en Colombia
+  workflow_dispatch:
+    inputs:
+      refresh_data:
+        description: "Volver a descargar los datos de Meetup antes de publicar"
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write # para asumir el rol de AWS con OIDC (sin claves guardadas)
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.cfg.outputs.ready }}
+    steps:
+      - id: cfg
+        env:
+          BUCKET: ${{ vars.S3_BUCKET }}
+          DIST_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+          ROLE: ${{ vars.AWS_ROLE_ARN }}
+        run: |
+          if [ -z "$BUCKET" ] || [ -z "$DIST_ID" ] || [ -z "$ROLE" ]; then
+            echo "::warning::El despliegue no está configurado todavía. Faltan las variables S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID y AWS_ROLE_ARN. Ver docs/DESPLIEGUE.md"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: check
+    if: needs.check.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BUCKET: ${{ vars.S3_BUCKET }}
+      DIST_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Actualizar datos de Meetup
+        if: github.event_name == 'schedule' || inputs.refresh_data
+        run: python3 scrape_global.py
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Compilar y publicar
+        run: ./deploy.sh
