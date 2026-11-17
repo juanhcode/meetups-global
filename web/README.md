@@ -29,6 +29,9 @@ SVG de los países presentes (`country-flag-icons`, MIT) a `public/flags/`.
 
 ## Créditos
 
+- Logo de AWS: archivo oficial sin modificar (`public/brand/`), en su versión para fondo oscuro. AWS y su logo son marcas
+  de Amazon.com, Inc. o sus afiliadas; su uso debe seguir las guías de marca del programa de comunidad de AWS.
+
 - Globo basado en el componente Globe3D de 21st.dev, adaptado (puntos agrupados por zoom, foco animado).
 - Texturas de la Tierra: NASA Blue Marble (vía three-globe).
 - El bento de estadísticas toma la idea de layout de "Analytics Bento" (@romanvasnev, MIT); implementación propia.

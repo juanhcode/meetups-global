@@ -5,6 +5,8 @@ export const LANGS: Lang[] = ["en", "es", "pt"];
 
 const dict = {
   en: {
+    openSource: "Open source",
+    repoCta: "The code is open on GitHub. Ideas, fixes and new data sources are welcome.",
     bentoMeetupsTitle: "Meetups held",
     bentoGroups: "Groups",
     bentoWhereTitle: "Where the community meets",
@@ -91,6 +93,8 @@ const dict = {
     loadError: "The data didn't load. Check your connection and reload the page.",
   },
   es: {
+    openSource: "Código abierto",
+    repoCta: "El código es abierto y está en GitHub. Ideas, arreglos y nuevas fuentes de datos son bienvenidos.",
     bentoMeetupsTitle: "Meetups realizados",
     bentoGroups: "Grupos",
     bentoWhereTitle: "Dónde se reúne la comunidad",
@@ -177,6 +181,8 @@ const dict = {
     loadError: "Los datos no cargaron. Revisa tu conexión y recarga la página.",
   },
   pt: {
+    openSource: "Código aberto",
+    repoCta: "O código é aberto e está no GitHub. Ideias, correções e novas fontes de dados são bem-vindas.",
     bentoMeetupsTitle: "Meetups realizados",
     bentoGroups: "Grupos",
     bentoWhereTitle: "Onde a comunidade se reúne",

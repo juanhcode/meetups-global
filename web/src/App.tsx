@@ -11,6 +11,7 @@ import {
 } from "@/lib/data";
 import { LANGS, useI18n } from "@/lib/i18n";
 import { Flag } from "@/components/flag";
+import { Emblem, GitHubIcon, REPO_URL } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 const GLOBE_CONFIG = {
@@ -307,10 +308,27 @@ export default function App() {
   return (
     <div className="relative min-h-svh overflow-x-clip bg-ink text-fg">
       <header className="relative z-20 mx-auto flex max-w-[1440px] items-center justify-between px-4 py-5 sm:px-8">
-        <a href="/" className="font-heading text-lg font-semibold tracking-tight">
-          {t.title} <span className="text-muted-fg">{year}</span>
-        </a>
-        <LangSwitch />
+        <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
+          {/* Logo oficial de AWS, sin modificar (versión para fondo oscuro), con su espacio de respeto */}
+          <img src="/brand/aws-logo-reversed.svg" alt="AWS" width={46} height={28} className="h-5 w-auto shrink-0 sm:h-7" />
+          <span aria-hidden="true" className="h-6 w-px shrink-0 bg-line-strong sm:h-7" />
+          <a href="/" className="flex min-w-0 items-center gap-2.5 font-heading text-base font-semibold tracking-tight sm:text-lg">
+            <Emblem size={28} className="hidden shrink-0 sm:block" />
+            <span className="leading-tight">{t.title} <span className="hidden text-muted-fg sm:inline">{year}</span></span>
+          </a>
+        </div>
+        <div className="flex items-center gap-2">
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-medium text-fg/85 transition-colors hover:border-fg/40 hover:text-fg"
+          >
+            <GitHubIcon size={14} />
+            <span className="hidden sm:inline">{t.openSource}</span>
+          </a>
+          <LangSwitch />
+        </div>
       </header>
 
       <div className="mx-auto grid max-w-[1440px] grid-cols-[minmax(0,1fr)] px-4 sm:px-8 lg:grid-cols-[minmax(0,540px)_minmax(0,1fr)] lg:gap-x-10">
@@ -436,6 +454,10 @@ export default function App() {
           {data && <p>{t.source(date(data.generated))}</p>}
           <p className="max-w-[72ch] text-xs leading-relaxed">{t.method}</p>
           <p className="max-w-[72ch] text-xs">{t.disclaimer}</p>
+          <p className="flex items-center gap-2 pt-2 text-xs">
+            <GitHubIcon size={14} />
+            <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="text-fg underline-offset-4 hover:underline">{t.repoCta}</a>
+          </p>
         </footer>
       </main>
 
