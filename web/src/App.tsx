@@ -308,10 +308,15 @@ export default function App() {
   return (
     <div className="relative min-h-svh overflow-x-clip bg-ink text-fg">
       <header className="relative z-20 mx-auto flex max-w-[1440px] items-center justify-between px-4 py-5 sm:px-8">
-        <a href="/" className="flex items-center gap-2.5 font-heading text-lg font-semibold tracking-tight">
-          <Emblem size={30} />
-          <span>{t.title} <span className="text-muted-fg">{year}</span></span>
-        </a>
+        <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
+          {/* Logo oficial de AWS, sin modificar (versión para fondo oscuro), con su espacio de respeto */}
+          <img src="/brand/aws-logo-reversed.svg" alt="AWS" width={46} height={28} className="h-5 w-auto shrink-0 sm:h-7" />
+          <span aria-hidden="true" className="h-6 w-px shrink-0 bg-line-strong sm:h-7" />
+          <a href="/" className="flex min-w-0 items-center gap-2.5 font-heading text-base font-semibold tracking-tight sm:text-lg">
+            <Emblem size={28} className="hidden shrink-0 sm:block" />
+            <span className="leading-tight">{t.title} <span className="hidden text-muted-fg sm:inline">{year}</span></span>
+          </a>
+        </div>
         <div className="flex items-center gap-2">
           <a
             href={REPO_URL}
