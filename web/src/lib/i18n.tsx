@@ -1,0 +1,328 @@
+import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+
+export type Lang = "en" | "es" | "pt";
+export const LANGS: Lang[] = ["en", "es", "pt"];
+
+const dict = {
+  en: {
+    bentoMeetupsTitle: "Meetups held",
+    bentoGroups: "Groups",
+    bentoWhereTitle: "Where the community meets",
+    bentoWhereSub: (a: number, b: number) => `Top ${a} of ${b} countries. Click one to filter the page.`,
+    bentoRadarHint: "Hover a day to compare",
+    bentoVs: (a: string, b: string) => `${a} vs ${b}`,
+    bentoAvg: "Average RSVPs per meetup",
+    bentoDayTitle: "Which day they meet",
+    bentoDaySub: "Share of each group type's meetups by weekday.",
+    bentoTypesTitle: "Student Builder Groups vs User Groups",
+    bentoTypesSub: "Meetups per month by group type.",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    zoomReset: "Show the whole globe",
+    citiesN: (n: number) => `${n} cities`,
+    groupsInCities: (g: number, c: number) => `${g} groups in ${c} cities`,
+    clickToZoom: "Click to zoom in",
+    title: "AWS Community Global",
+    heroLead: (y: number) => `In ${y},`,
+    heroGroups: (n: number) => (n === 1 ? "AWS community group" : "AWS community groups"),
+    heroRan: "ran",
+    heroMeetups: "meetups",
+    heroAcross: "across",
+    heroCountries: (n: number) => (n === 1 ? "country" : "countries"),
+    heroSub: "Every point on the globe is a city with an AWS Student Builder Group or User Group. Filter by type, region or country and the globe takes you there.",
+    all: "All groups",
+    sbg: "Student Builder Groups",
+    ug: "User Groups",
+    filterType: "Group type",
+    filterRegion: "Region",
+    filterCountry: "Country",
+    world: "Whole world",
+    allCountries: (n: number) => `All countries (${n})`,
+    clearFilters: "Clear filters",
+    continents: { NA: "North America", LATAM: "Latin America", EU: "Europe", AF: "Africa", AS: "Asia", OC: "Oceania" },
+    kGroups: "groups",
+    kActive: "held meetups this year",
+    kCountries: "countries with activity",
+    kMeetups: "meetups held",
+    kReach: "RSVPs to those meetups",
+    kNew: "new members this year",
+    monthTitle: "The year in numbers",
+    monthSub: "Past events only, so the current month is still counting. Hover the charts to see each value.",
+    countriesTitle: "Countries",
+    countriesSub: "Ranked by meetups held. Pick one to filter the whole page.",
+    showAll: (n: number) => `Show all ${n}`,
+    showLess: "Show fewer",
+    topTitle: "Top groups",
+    topByMeetups: "Most meetups",
+    topByReach: "Most RSVPs",
+    explorerTitle: "Every group",
+    explorerSub: "Search by group, city or country. Open a group to see each event and where it is on the globe.",
+    searchPh: "Search groups, cities or countries",
+    sortMeetups: "Meetups",
+    sortReach: "RSVPs",
+    sortNew: "New members",
+    exportCsv: "Export CSV",
+    exported: "Exported",
+    noMatch: (q: string) => (q ? `No groups match “${q}”` : "No groups match these filters"),
+    noMatchHint: "Try another name or city, or clear the filters.",
+    clearSearch: "Clear search",
+    showMore: (n: number) => `Show ${n} more`,
+    shownOf: (a: string, b: string) => `${a} of ${b} groups`,
+    evDate: "Date",
+    evTitle: "Event",
+    evFormat: "Format",
+    evRsvp: "RSVPs",
+    formats: { P: "In person", O: "Online", H: "Hybrid" } as Record<string, string>,
+    openMeetup: "Open on Meetup",
+    eventsLoading: "Loading events…",
+    members: "members",
+    reach: "RSVPs",
+    newMembers: "new members",
+    groupsIn: (n: number) => (n === 1 ? "1 group" : `${n} groups`),
+    meetupsN: (n: string) => `${n} meetups`,
+    noActivity: "no meetups yet",
+    more: (n: number) => `and ${n} more`,
+    approx: "Approximate location",
+    globeHint: "Drag to spin. Click a point to see its groups.",
+    source: (d: string) => `Public Meetup data, updated ${d}.`,
+    method: "RSVPs are confirmed “yes” responses to past 2026 events, not verified attendance. New members are current members who joined in 2026. Groups are found by searching Meetup for “AWS”, so a few may be missing.",
+    disclaimer: "Independent community project. Not affiliated with, endorsed or sponsored by Amazon Web Services.",
+    loading: "Loading the community map…",
+    loadError: "The data didn't load. Check your connection and reload the page.",
+  },
+  es: {
+    bentoMeetupsTitle: "Meetups realizados",
+    bentoGroups: "Grupos",
+    bentoWhereTitle: "Dónde se reúne la comunidad",
+    bentoWhereSub: (a: number, b: number) => `Los ${a} principales de ${b} países. Haz clic en uno para filtrar la página.`,
+    bentoRadarHint: "Pasa el cursor por un día para comparar",
+    bentoVs: (a: string, b: string) => `${a} vs ${b}`,
+    bentoAvg: "RSVP promedio por meetup",
+    bentoDayTitle: "Qué día se reúnen",
+    bentoDaySub: "Porcentaje de los meetups de cada tipo de grupo por día de la semana.",
+    bentoTypesTitle: "Student Builder Groups vs User Groups",
+    bentoTypesSub: "Meetups por mes según el tipo de grupo.",
+    zoomIn: "Acercar",
+    zoomOut: "Alejar",
+    zoomReset: "Ver todo el globo",
+    citiesN: (n: number) => `${n} ciudades`,
+    groupsInCities: (g: number, c: number) => `${g} grupos en ${c} ciudades`,
+    clickToZoom: "Haz clic para acercarte",
+    title: "AWS Community Global",
+    heroLead: (y: number) => `En ${y},`,
+    heroGroups: (n: number) => (n === 1 ? "grupo de la comunidad AWS" : "grupos de la comunidad AWS"),
+    heroRan: "hicieron",
+    heroMeetups: "meetups",
+    heroAcross: "en",
+    heroCountries: (n: number) => (n === 1 ? "país" : "países"),
+    heroSub: "Cada punto del globo es una ciudad con un Student Builder Group o un User Group de AWS. Filtra por tipo, región o país y el globo te lleva hasta allá.",
+    all: "Todos los grupos",
+    sbg: "Student Builder Groups",
+    ug: "User Groups",
+    filterType: "Tipo de grupo",
+    filterRegion: "Región",
+    filterCountry: "País",
+    world: "Todo el mundo",
+    allCountries: (n: number) => `Todos los países (${n})`,
+    clearFilters: "Quitar filtros",
+    continents: { NA: "Norteamérica", LATAM: "Latinoamérica", EU: "Europa", AF: "África", AS: "Asia", OC: "Oceanía" },
+    kGroups: "grupos",
+    kActive: "hicieron meetups este año",
+    kCountries: "países con actividad",
+    kMeetups: "meetups realizados",
+    kReach: "RSVP en esos meetups",
+    kNew: "miembros nuevos este año",
+    monthTitle: "El año en números",
+    monthSub: "Solo eventos ya realizados, así que el mes actual sigue sumando. Pasa el cursor por las gráficas para ver cada valor.",
+    countriesTitle: "Países",
+    countriesSub: "Ordenados por meetups realizados. Elige uno para filtrar toda la página.",
+    showAll: (n: number) => `Ver los ${n}`,
+    showLess: "Ver menos",
+    topTitle: "Top grupos",
+    topByMeetups: "Más meetups",
+    topByReach: "Más RSVP",
+    explorerTitle: "Todos los grupos",
+    explorerSub: "Busca por grupo, ciudad o país. Abre un grupo para ver cada evento y dónde está en el globo.",
+    searchPh: "Buscar grupos, ciudades o países",
+    sortMeetups: "Meetups",
+    sortReach: "RSVP",
+    sortNew: "Miembros nuevos",
+    exportCsv: "Exportar CSV",
+    exported: "Exportado",
+    noMatch: (q: string) => (q ? `Ningún grupo coincide con “${q}”` : "Ningún grupo coincide con estos filtros"),
+    noMatchHint: "Prueba con otro nombre o ciudad, o quita los filtros.",
+    clearSearch: "Borrar búsqueda",
+    showMore: (n: number) => `Ver ${n} más`,
+    shownOf: (a: string, b: string) => `${a} de ${b} grupos`,
+    evDate: "Fecha",
+    evTitle: "Evento",
+    evFormat: "Formato",
+    evRsvp: "RSVP",
+    formats: { P: "Presencial", O: "Online", H: "Híbrido" } as Record<string, string>,
+    openMeetup: "Abrir en Meetup",
+    eventsLoading: "Cargando eventos…",
+    members: "miembros",
+    reach: "RSVP",
+    newMembers: "miembros nuevos",
+    groupsIn: (n: number) => (n === 1 ? "1 grupo" : `${n} grupos`),
+    meetupsN: (n: string) => `${n} meetups`,
+    noActivity: "sin meetups aún",
+    more: (n: number) => `y ${n} más`,
+    approx: "Ubicación aproximada",
+    globeHint: "Arrastra para girar. Haz clic en un punto para ver sus grupos.",
+    source: (d: string) => `Datos públicos de Meetup, actualizados el ${d}.`,
+    method: "RSVP = respuestas “sí” confirmadas en eventos pasados de 2026, no asistencia verificada. Miembros nuevos = miembros actuales que se unieron en 2026. Los grupos se encuentran buscando “AWS” en Meetup, así que puede faltar alguno.",
+    disclaimer: "Proyecto comunitario independiente. No está afiliado, respaldado ni patrocinado por Amazon Web Services.",
+    loading: "Cargando el mapa de la comunidad…",
+    loadError: "Los datos no cargaron. Revisa tu conexión y recarga la página.",
+  },
+  pt: {
+    bentoMeetupsTitle: "Meetups realizados",
+    bentoGroups: "Grupos",
+    bentoWhereTitle: "Onde a comunidade se reúne",
+    bentoWhereSub: (a: number, b: number) => `Os ${a} principais de ${b} países. Clique em um para filtrar a página.`,
+    bentoRadarHint: "Passe o cursor sobre um dia para comparar",
+    bentoVs: (a: string, b: string) => `${a} vs ${b}`,
+    bentoAvg: "Média de RSVPs por meetup",
+    bentoDayTitle: "Em que dia se reúnem",
+    bentoDaySub: "Porcentagem dos meetups de cada tipo de grupo por dia da semana.",
+    bentoTypesTitle: "Student Builder Groups vs User Groups",
+    bentoTypesSub: "Meetups por mês segundo o tipo de grupo.",
+    zoomIn: "Aproximar",
+    zoomOut: "Afastar",
+    zoomReset: "Ver o globo inteiro",
+    citiesN: (n: number) => `${n} cidades`,
+    groupsInCities: (g: number, c: number) => `${g} grupos em ${c} cidades`,
+    clickToZoom: "Clique para aproximar",
+    title: "AWS Community Global",
+    heroLead: (y: number) => `Em ${y},`,
+    heroGroups: (n: number) => (n === 1 ? "grupo da comunidade AWS" : "grupos da comunidade AWS"),
+    heroRan: "realizaram",
+    heroMeetups: "meetups",
+    heroAcross: "em",
+    heroCountries: (n: number) => (n === 1 ? "país" : "países"),
+    heroSub: "Cada ponto no globo é uma cidade com um Student Builder Group ou User Group da AWS. Filtre por tipo, região ou país e o globo leva você até lá.",
+    all: "Todos os grupos",
+    sbg: "Student Builder Groups",
+    ug: "User Groups",
+    filterType: "Tipo de grupo",
+    filterRegion: "Região",
+    filterCountry: "País",
+    world: "Mundo todo",
+    allCountries: (n: number) => `Todos os países (${n})`,
+    clearFilters: "Limpar filtros",
+    continents: { NA: "América do Norte", LATAM: "América Latina", EU: "Europa", AF: "África", AS: "Ásia", OC: "Oceania" },
+    kGroups: "grupos",
+    kActive: "fizeram meetups este ano",
+    kCountries: "países com atividade",
+    kMeetups: "meetups realizados",
+    kReach: "RSVPs nesses meetups",
+    kNew: "novos membros este ano",
+    monthTitle: "O ano em números",
+    monthSub: "Somente eventos já realizados, então o mês atual ainda está contando. Passe o cursor nos gráficos para ver cada valor.",
+    countriesTitle: "Países",
+    countriesSub: "Ordenados por meetups realizados. Escolha um para filtrar a página toda.",
+    showAll: (n: number) => `Ver todos os ${n}`,
+    showLess: "Ver menos",
+    topTitle: "Top grupos",
+    topByMeetups: "Mais meetups",
+    topByReach: "Mais RSVPs",
+    explorerTitle: "Todos os grupos",
+    explorerSub: "Busque por grupo, cidade ou país. Abra um grupo para ver cada evento e onde ele fica no globo.",
+    searchPh: "Buscar grupos, cidades ou países",
+    sortMeetups: "Meetups",
+    sortReach: "RSVPs",
+    sortNew: "Novos membros",
+    exportCsv: "Exportar CSV",
+    exported: "Exportado",
+    noMatch: (q: string) => (q ? `Nenhum grupo corresponde a “${q}”` : "Nenhum grupo corresponde a estes filtros"),
+    noMatchHint: "Tente outro nome ou cidade, ou limpe os filtros.",
+    clearSearch: "Limpar busca",
+    showMore: (n: number) => `Ver mais ${n}`,
+    shownOf: (a: string, b: string) => `${a} de ${b} grupos`,
+    evDate: "Data",
+    evTitle: "Evento",
+    evFormat: "Formato",
+    evRsvp: "RSVPs",
+    formats: { P: "Presencial", O: "Online", H: "Híbrido" } as Record<string, string>,
+    openMeetup: "Abrir no Meetup",
+    eventsLoading: "Carregando eventos…",
+    members: "membros",
+    reach: "RSVPs",
+    newMembers: "novos membros",
+    groupsIn: (n: number) => (n === 1 ? "1 grupo" : `${n} grupos`),
+    meetupsN: (n: string) => `${n} meetups`,
+    noActivity: "sem meetups ainda",
+    more: (n: number) => `e mais ${n}`,
+    approx: "Localização aproximada",
+    globeHint: "Arraste para girar. Clique em um ponto para ver seus grupos.",
+    source: (d: string) => `Dados públicos do Meetup, atualizados em ${d}.`,
+    method: "RSVPs = respostas “sim” confirmadas em eventos passados de 2026, não presença verificada. Novos membros = membros atuais que entraram em 2026. Os grupos são encontrados buscando “AWS” no Meetup, então algum pode faltar.",
+    disclaimer: "Projeto comunitário independente. Não é afiliado, endossado ou patrocinado pela Amazon Web Services.",
+    loading: "Carregando o mapa da comunidade…",
+    loadError: "Os dados não carregaram. Verifique sua conexão e recarregue a página.",
+  },
+} as const;
+
+type Widen<T> = T extends (...a: infer A) => infer R ? (...a: A) => R : T extends string ? string : { [K in keyof T]: Widen<T[K]> };
+export type Dict = Widen<(typeof dict)["en"]>;
+
+interface I18n {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  t: Dict;
+  num: (n: number) => string;
+  country: (code: string) => string;
+  date: (iso: string) => string;
+  shortDate: (iso: string) => string;
+  month: (m: number) => string;
+  weekday: (d: number) => string;
+}
+
+const Ctx = createContext<I18n | null>(null);
+
+function initialLang(): Lang {
+  try {
+    const saved = localStorage.getItem("lang") as Lang | null;
+    if (saved && LANGS.includes(saved)) return saved;
+  } catch { /* sin storage */ }
+  const nav = navigator.language.slice(0, 2) as Lang;
+  return LANGS.includes(nav) ? nav : "en";
+}
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangState] = useState<Lang>(initialLang);
+  const value = useMemo<I18n>(() => {
+    const nf = new Intl.NumberFormat(lang);
+    const names = new Intl.DisplayNames([lang], { type: "region" });
+    const df = new Intl.DateTimeFormat(lang, { dateStyle: "long" });
+    const dfs = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short" });
+    const mf = new Intl.DateTimeFormat(lang, { month: "short", timeZone: "UTC" });
+    const wf = new Intl.DateTimeFormat(lang, { weekday: "short", timeZone: "UTC" });
+    return {
+      lang,
+      setLang: (l) => {
+        setLangState(l);
+        try { localStorage.setItem("lang", l); } catch { /* sin storage */ }
+      },
+      t: dict[lang] as unknown as Dict,
+      num: (n) => nf.format(n),
+      country: (code) => {
+        try { return names.of(code.toUpperCase()) ?? code.toUpperCase(); } catch { return code.toUpperCase(); }
+      },
+      date: (iso) => df.format(new Date(iso + "T12:00:00")),
+      shortDate: (iso) => dfs.format(new Date(iso + "T12:00:00")),
+      month: (m) => mf.format(new Date(Date.UTC(2026, m, 15))),
+      // 0 = lunes (2026-01-05 fue lunes)
+      weekday: (d) => wf.format(new Date(Date.UTC(2026, 0, 5 + d))).replace(".", ""),
+    };
+  }, [lang]);
+  document.documentElement.lang = lang;
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+export function useI18n() {
+  const v = useContext(Ctx);
+  if (!v) throw new Error("useI18n fuera de I18nProvider");
+  return v;
+}
